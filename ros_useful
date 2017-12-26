@@ -1,0 +1,334 @@
++----------------------------------------------------------------------+
++-----------------------<<<<<   GENERAL   >>>>>------------------------+
++----------------------------------------------------------------------+
+
+$roscore&
+        ^
+        |
+        when added u can continue executing commands on terminal like
+	you oppened other while previous command continues running
+
+////////////////-------------------------------------///////////////////
+
+File .bashrc is located in Home. To view use $la in terminal.
+
+////////////////-------------------------------------///////////////////
+   __________________
+  |                  |
+  | Catkin Workspace |
+  |__________________| 
+
+-The build folder is the default location of the build space and is where cmake and make are called to configure and build your packages. 
+
+-The devel folder is the default location of the devel space, which is where your executables and libraries go before you install your packages.
+
+-msg:msg files are simple text files that describe the fields of a ROS message. They are used to generate source code for messages in different languages.
+
+-srv: an srv file describes a service. It is composed of two parts: a request and a response. 
+
+////////////////-------------------------------------///////////////////
+
+view_frames is a graphical debugging tool that creates a PDF graph of your current transform tree.
+
+-rosrun tf view_frames
+-evince frames.pdf
+
+////////////////-------------------------------------///////////////////
+   _________________
+  |                 |
+  | OpenCV with C++ |
+  |_________________| 
+
+First make the installation of opencv and follow the steps here:
+
+-https://github.com/cesco345/StemApks/blob/master/TutorialsNotebook%20(1).ipynb
+-https://www.youtube.com/watch?v=DRH-EaIhOlc
+
+If error occurs while making executable in c++:
+
+-g++ image.cpp  -o imageexec `pkg-config opencv --cflags --libs`
+
+---->/usr/bin/ld: cannot find -lippicv
+---->collect2: error: ld returned 1 exit status
+
+You locate where it is in the filesystem:
+
+-find /usr/local -name "libippicv.a"
+
+Then linking it to the directory in the pkg-confid file for opencv (/usr/local/lib/pkgconfig/opencv.pc), which is /usr/local/lib.
+
+-sudo ln -s /usr/local/share/OpenCV/3rdparty/lib/libippicv.a /usr/local/lib
+
+Or something similar to make a symbolic link to libcuda where ld is searching it.
+
+-sudo ln -s /usr/local/cuda/lib64/libcudart.so /usr/lib/libcudart.so
+
+After the executable is created simply run it while in it's directory:
+
+./imageexec
+
+Main library to include in c++ code, while using opencv in it:
+
+-#include <cv_bridge/cv_bridge.h>
+
+----->Important!!!
+When including any libraries of opencv in your catkin package, just include this in CMakeLists.txt and package.xml (if u at least have cv_bridge included):
+--------->CMakeLists.txt:
+		find_package(catkin REQUIRED COMPONENTS
+                ...
+                cv_bridge
+                ...)  
+              
+--------->package.xml:
+                <build_depend>opencv2</build_depend>
+		<exec_depend>opencv2</exec_depend>
+
+
++-----------------------------------------------------------------------+
++-----------------------<<<<<   SPECIFIC   >>>>>------------------------+
++-----------------------------------------------------------------------+
+
+##########################################
+
+First : sudo apt-get install ros-kinetic-nao-robot
+
+To install drivers for nao:
+
+-cd catkin_ws/src
+-git clone https://github.com/ros-naoqi/naoqi_bridge.git
+-rosdep install -i -y --from-paths ./naoqi_bridge
+-source /opt/ros/kinetic/setup.sh
+-cd ../
+-catkin_make <--( will build any packages located in ~/catkin_ws/src )
+
+##########################################
+-http://wiki.ros.org/nao_bringup
+   ___________
+  |           |
+( | nao_robot | : nao_apps & nao_bringup & nao_description )
+  |___________|
+
+{nao_bringup} contains launch and configuration files as a single-entry point for nao. The launch files are starting all basic actuators and sensor publishers in their robot specific configurations.
+To start the robot bringup:
+
+-$roslaunch nao_bringup nao_full.launch nao_ip:=10.0.0.199 roscore:=127.0.0.1 network_interface:=wlp3s0
+
+This will start the robot's default configuration with the following publisher:
+
+   - joint_states
+   - tf
+   - top camera
+   - bottom camera
+   - left sonar
+   - right sonar
+   - microphone 
+
+Once this is successfully launched, you can simply open RVIZ. The bringup package provides already a rviz-config file. Simply open this configuration and you will see the robot model, tf, and the top camera.
+
+Unified Robot Description Format (URDF), is an XML format for representing a robot model.
+
+##########################################
+   ______________
+  |              |
+( | naoqi_bridge | : naoqi_apps & naoqi_bridge_msgs & naoqi_driver & naoqi_driver_py 
+  |______________|   & naoqi_pose & naoqi_sensors_py & naoqi_tools )
+
+This is a naoqi driver module that bridges with ROS. It publishes several sensor data as well as the robot position.
+
+On the other hand it enables ROS to call parts of the NAOqi API.
+
+The naoqi_driver module is in charge of providing some bridge capabilities between ROS and NAOqiOS.
+
+The naoqi_driver module is a NAOqi module that also acts as a ROS node. As there is no roscore on the robot, it needs to be given the IP of the roscore in order to be registered as a node in the ROS processing graph. Usually, you will start your roscore on your local desktop.
+
+$roslaunch naoqi_driver naoqi_driver.launch nao_ip:=10.0.0.199 roscore:=127.0.0.1
+
+->{ or }<-
+
+$roslaunch naoqi_driver naoqi_driver.launch nao_ip:=10.0.0.199 roscore:=127.0.0.1 network_interface:=wlp3s0 ------ ($ifconfig to see network info)
+                     ^
+		     |
+     (name my computer gives to wi-fi)
+
+Next in other terminal-> $rqt_image_view
+
+##########################################
+   ____________
+  |            |
+( |    rviz    | : rviz is a 3D visualizer for the Robot Operating System (ROS) 
+  |____________|   framework. )
+
+first : sudo apt-get install ros-indigo-nao-meshes (to be able to visualize the 						    complete 3D model)
+
+As a visualizer it will make possible to show nao on it's screen if you successfully create a bridge with nao (like running naoqi_driver.launch).
+
+##########################################
+   ____________
+  |            |
+  |  Packages  | 
+  |____________|
+
+Start by creating a new package in catkin_ws/src.
+
+-catkin_create_pkg sonar_package std_msgs rospy roscpp
+
+Then you need to build the packages in the catkin workspace, so you go back to catkin_ws and:
+
+-catkin_make
+-catkin_make install (optionally)
+
+To add the workspace to your ROS environment you need to source the generated setup file.
+
+-source ~/catkin_ws/devel/setup.bash
+-source /opt/ros/kinetic/setup.bash  <- source environment setup file for my 						shell (probably done already)
+
+Command below is to view first-order dependencies. These dependencies for a package are stored in the package.xml file which we had to customize(it contains meta information, about maintainer, license, dependencies).
+
+-rospack depends1 sonar_package
+
+##########################################
+   _____________
+  |             |
+  | msg and srv | :
+  |_____________|
+
+   _____
+  |     |
+  | msg | 
+  |_____|
+
+Messages are ROS data type used when subscribing or publishing to a topic.
+To create a msg we do it in our package (catkin_ws/src/sonar_package).
+
+-mkdir msg
+-echo "int64 num" > msg/Num.msg
+
+After creating it we write in Num.msg a line of code with the first element.
+A lot of elements can exist in the same file, one per line, like:
+
+string first_name
+string last_name
+uint8 age
+uint32 score
+
+Then in package.xml that exists in the package sonar_package we add:
+
+<build_depend>message_generation</build_depend>
+<exec_depend>message_runtime</exec_depend>
+
+In CMakeLists.txt that exists in the package sonar_package we modify the existing text to add message_generation : 
+
+find_package(catkin REQUIRED COMPONENTS
+   roscpp
+   rospy
+   std_msgs
+   message_generation <---- Added
+)
+
+In CMakeLists.txt we modify the existing text by adding message_runtime, and uncomment the single line of code CATKIN_DEPENDS:
+
+catkin_package(
+  ...
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime <---- Added
+  ...)
+
+Then we uncomment the following block of code and modify it:
+
+# add_message_files(                   add_message_files(
+#   FILES                ---->            FILES
+#   Message1.msg         ---->            Num.msg
+#   Message2.msg                       )
+# )
+
+We just uncomment the following block of code:
+
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
+
+   _____
+  |     |
+  | srv | 
+  |_____|
+
+To create a srv we do it in our package (catkin_ws/src/sonar_package).
+
+-mkdir srv
+
+As an example we can copy a service from the rospy_tutorials package:
+
+-roscp rospy_tutorials AddTwoInts.srv srv/AddTwoInts.srv
+
+We need to make sure that the srv files are turned into source code for C++, Python, and other languages by adding two lined of code in package.xml (we already did that for the msg). As before, note that at build time, we need "message_generation", while at runtime, we only need "message_runtime". We have to add message_generation in find_package in the CMakeLists.txt file (we did that for the msg already).
+
+We have to uncomment in CMakeLists.txt this block of code and modify it too:
+
+# add_service_files(                 add_service_files(
+#   FILES        	  ----> 	FILES
+#   Service1.srv	  ----> 	AddTwoInts.srv
+#   Service2.srv		     )	
+# )
+
+At last we need to build our package after all this work, so we cd to catkin_ws and:
+
+-catkin_make install
+
+Continuing on creating nodes, listener or talker (c++ files located in sonar_package/src), we have to declare them as executables in CMakeLists.txt in the Build section (above the Install section). So we add:
+
+-add_executable(talker src/listener.cpp)
+-target_link_libraries(talker ${catkin_LIBRARIES})
+-add_dependencies(talker sonar_package_generate_messages_cpp)
+
+-add_executable(talker src/talker.cpp)
+-target_link_libraries(talker ${catkin_LIBRARIES})
+-add_dependencies(talker sonar_package_generate_messages_cpp)
+
+The executables created will be located by default at ~/catkin_ws/devel/lib/sonar_package.
+
+//////////////////////////////////////////////////////////////////////
+   _______
+  |       |
+  | Nodes | 
+  |_______|
+
+A node is an executable that uses ROS to communicate with other nodes. 
+
+Continuing on creating nodes, listener or talker (c++ files located in sonar_package/src), we have to declare them as executables in CMakeLists.txt in the Build section (above the Install section). So we add:
+
+-add_executable(listener src/listener.cpp)
+-target_link_libraries(listener ${catkin_LIBRARIES})
+-add_dependencies(listener sonar_package_generate_messages_cpp)
+
+-add_executable(talker src/talker.cpp)
+-target_link_libraries(talker ${catkin_LIBRARIES})
+-add_dependencies(talker sonar_package_generate_messages_cpp)
+
+The executables created will be located by default at ~/catkin_ws/devel/lib/sonar_package.
+
+In the end we need a .launch file in our package ( roslaunch starts nodes as defined in the launch file ). So we create it while in our package (~/sonar_package):
+
+-mkdir launch
+
+And then create the .launch file (sonar_map.launch).
+Of course we have to build our package again. To run it:
+
+-roslaunch sonar_package sonar_map.launch
+
+On the other hand if we want to run a node (like the listener) in the package we do:
+
+-rosrun sonar_package listener <--If rosrun can't find the package, then when in 					  catkin_ws do $source devel/setup.bash
+
+//////////////////////////////////////////////////////////////////////
+
+to turn: http://wiki.ros.org/Robots/TIAGo/Tutorials/motions/cmd_vel
+moves at 0.3 rad/sec around itself
+
+rostopic pub -1 /cmd_vel geometry_msgs/Twist '{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.3}}'
+
+to go straight: https://answers.ros.org/question/45313/nao-ros-walking-howto/
+
+rostopic pub -1 /cmd_vel geometry_msgs/Twist '{linear: {x: 1.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}'
+
+//////////////////////////////////////////////////////////////////////
+
