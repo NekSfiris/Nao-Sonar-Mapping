@@ -4,7 +4,7 @@ A ROS based package implementation for Nao v5 robot to create a polar map of its
 Check code in order to change angle of rotation or motion speed.
 
 ### Outcome Example
-Red dots denote the estimated object's position, while the circle around it the area in which is its actual position.
+Red dots denote the estimated object's location, while the circle around it denotes the area in which is its actual position.
 ![alt text](https://github.com/NekSfiris/Nao-Sonar-Mapping/blob/master/presentation%20Embedded/Image_screenshot_08.12.2017.png)
 
 ### Prerequisites
