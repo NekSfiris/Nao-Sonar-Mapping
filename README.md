@@ -5,7 +5,7 @@ Check code in order to change angle of rotation or motion speed.
 
 ### Outcome Example
 
-![alt text](https://github.com/NekSfiris/Nao-Sonar-Mapping/blob/master/presentation%20Embedded/Image_screenshot_08.12.2017.png)
+![Red dots denote the estimated objects position, while the circle around it the area of possible actual position.](https://github.com/NekSfiris/Nao-Sonar-Mapping/blob/master/presentation%20Embedded/Image_screenshot_08.12.2017.png)
 
 ### Prerequisites
 
