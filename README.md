@@ -1,7 +1,7 @@
 # Nao-Sonar-Mapping
 
 A ROS based package implementation for Nao v5 robot to create a polar map of its surroundings using its sonars in C++.
-Check code in order to change angle of rotation and motion speed.
+Check code in order to change angle of rotation or motion speed.
 
 ### Outcome Example
 
