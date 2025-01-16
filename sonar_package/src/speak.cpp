@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv)
 {
-		//ROS node named speek
+	//ROS node definition
         ros::init(argc, argv, "speek");
         ros::NodeHandle n;
         ros::Publisher speech_pub = n.advertise<std_msgs::String>("speech", 100);
@@ -11,7 +11,7 @@ int main(int argc, char **argv)
         str.data = "hello world";
         speech_pub.publish(str);
 	
-		ros::spin();
+	ros::spin();
 
         return 0;
 }
